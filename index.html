@@ -284,7 +284,7 @@
 
         <div class="check-wrap">
           <input type="checkbox" id="dmTierBoost" />
-          <label for="dmTierBoost">Is this a Tier 1 or Tier 2 bracket?</label>
+          <label for="dmTierBoost">Use quest XP rewards for DM (Tier 1 / Tier 2 bracket)</label>
         </div>
       </div>
 
@@ -648,25 +648,19 @@
 
       const dmMotes = getDMMotes(hours);
 
-      if (dmLevel === 20) {
-        let dmRovPerHour = levelData[dmLevel].questXP;
-        if (tierBoostChecked) {
-          dmRovPerHour = dmRovPerHour * 1.5;
-        }
+      const dmXpPerHour = tierBoostChecked
+        ? levelData[dmLevel].questXP * 1.5
+        : levelData[dmLevel].rpXP;
 
-        const dmRovRaw = hours * dmRovPerHour;
+      if (dmLevel === 20) {
+        const dmRovRaw = hours * dmXpPerHour;
         const dmRovFinal = Math.ceil(dmRovRaw);
 
         resultText +=
           "[DM rewards: [" + dmName + "] – [" + dmCharacterName + "] [(Level " + dmLevel + ")] receives " +
           dmMotes + " motes and " + dmRovFinal + " ROV]";
       } else {
-        let dmQuestXPPerHour = levelData[dmLevel].questXP;
-        if (tierBoostChecked) {
-          dmQuestXPPerHour = dmQuestXPPerHour * 1.5;
-        }
-
-        const dmXPRaw = hours * dmQuestXPPerHour;
+        const dmXPRaw = hours * dmXpPerHour;
         const dmXPFinal = Math.ceil(dmXPRaw);
 
         resultText +=
