@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Endless March Rewards Calculators</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg1: #d9d2b6;
+      --bg2: #b9b08f;
+      --panel: rgba(245, 239, 220, 0.94);
+      --panel-dark: rgba(223, 214, 185, 0.96);
+      --green1: #4d5f3a;
+      --green2: #6d7c52;
+      --green3: #324229;
+      --accent: #8a6b3f;
+      --text: #2b2518;
+      --border: #7c6a46;
+      --shadow: rgba(33, 29, 18, 0.18);
+    }
+
+    body {
+      margin: 0;
+      padding: 18px;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(217, 210, 182, 0.45), rgba(185, 176, 143, 0.50)),
+        url("https://i.imgur.com/a1uL09Bh.jpg") center center/cover no-repeat fixed;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 24px var(--shadow);
+      backdrop-filter: blur(2px);
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      font-size: 2.2rem;
+      color: var(--green3);
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      margin: 8px 0 22px 0;
+      text-align: center;
+      font-style: italic;
+      color: #4d4632;
+      font-size: 0.98rem;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--green2), var(--green1));
+      color: #f7f2df;
+      padding: 13px 12px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 8px var(--shadow);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(180deg, #7f8e61, #4e613c);
+      outline: 2px solid rgba(255, 248, 217, 0.5);
+    }
+
+    .tab-content {
+      display: none;
+      background: var(--panel-dark);
+      border: 1px solid rgba(124, 106, 70, 0.55);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section-title {
+      margin: 0 0 10px 0;
+      color: var(--green3);
+      font-size: 1.25rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #3c3524;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    input, select, textarea {
+      border: 1px solid #98865d;
+      background: #fffdf5;
+      color: #262012;
+      padding: 12px;
+    }
+
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .player-card,
+    .dm-card {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(255, 251, 239, 0.72);
+      border: 1px solid rgba(124, 106, 70, 0.4);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+    }
+
+    .card-title {
+      margin: 0 0 8px 0;
+      color: var(--green3);
+      font-size: 1.08rem;
+    }
+
+    .small {
+      margin-top: 8px;
+      color: #5a523f;
+      font-size: 0.92rem;
+    }
+
+    .check-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid rgba(124, 106, 70, 0.35);
+      border-radius: 10px;
+      background: rgba(255, 251, 239, 0.65);
+    }
+
+    .check-wrap input[type="checkbox"] {
+      width: auto;
+      transform: scale(1.2);
+      accent-color: var(--green1);
+    }
+
+    .check-wrap label {
+      margin: 0;
+      font-weight: bold;
+    }
+
+    .action-btn, .clear-btn {
+      border: none;
+      padding: 14px;
+      margin-top: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 3px 8px var(--shadow);
+    }
+
+    .action-btn {
+      background: linear-gradient(180deg, var(--green2), var(--green1));
+      color: #f7f2df;
+    }
+
+    .clear-btn {
+      background: linear-gradient(180deg, #c2b89a, #ab9f7d);
+      color: #2f281b;
+    }
+
+    .output {
+      margin-top: 18px;
+      background: #fffdf6;
+      border: 1px solid #a59065;
+      border-radius: 12px;
+      padding: 14px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      min-height: 180px;
+      font-size: 0.98rem;
+    }
+
+    @media (max-width: 800px) {
+      .tabs,
+      .row,
+      .row-3 {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      textarea {
+        min-height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Endless March Rewards Calculators</h1>
+    <div class="subtitle">Quest, Time-based RP, Character Count RP all in one place.</div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('questTab', this)">Quest Rewards</button>
+      <button class="tab-btn" onclick="showTab('timeTab', this)">Time-based Roleplay</button>
+      <button class="tab-btn" onclick="showTab('ccTab', this)">Character Count Roleplay</button>
+    </div>
+
+    <!-- QUEST TAB -->
+    <div id="questTab" class="tab-content active">
+      <h2 class="section-title">Quest Rewards</h2>
+
+      <div class="row">
+        <div>
+          <label for="questName">Quest Name</label>
+          <input type="text" id="questName" placeholder="Enter quest name" />
+        </div>
+        <div>
+          <label for="questPlayerCount">Number of Players</label>
+          <select id="questPlayerCount" onchange="renderQuestPlayers()"></select>
+        </div>
+      </div>
+
+      <div class="dm-card">
+        <h3 class="card-title">DM Rewards</h3>
+
+        <div class="row-3">
+          <div>
+            <label for="dmName">DM Name</label>
+            <input type="text" id="dmName" placeholder="@DMName" />
+          </div>
+          <div>
+            <label for="dmCharacterName">DM Character Name</label>
+            <input type="text" id="dmCharacterName" placeholder="Enter DM character name" />
+          </div>
+          <div>
+            <label for="dmLevel">DM Character Level</label>
+            <select id="dmLevel"></select>
+          </div>
+        </div>
+
+        <div class="check-wrap">
+          <input type="checkbox" id="dmTierBoost" />
+          <label for="dmTierBoost">Use quest XP rewards for DM (Tier 1 / Tier 2 bracket)</label>
+        </div>
+      </div>
+
+      <div id="questPlayersWrap"></div>
+
+      <div class="row">
+        <div>
+          <label for="questStart">Starting Time</label>
+          <input type="datetime-local" id="questStart" />
+        </div>
+        <div>
+          <label for="questEnd">End Time</label>
+          <input type="datetime-local" id="questEnd" />
+        </div>
+      </div>
+
+      <button class="action-btn" onclick="calculateQuestRewards()">Calculate Output</button>
+      <button class="clear-btn" onclick="clearQuestTab()">Clear</button>
+
+      <div class="output" id="questOutput">Your result will show here.</div>
+    </div>
+
+    <!-- TIME TAB -->
+    <div id="timeTab" class="tab-content">
+      <h2 class="section-title">Time-based Roleplay</h2>
+
+      <div class="row">
+        <div>
+          <label for="timeSessionName">RP Session Name</label>
+          <input type="text" id="timeSessionName" placeholder="Enter RP session name" />
+        </div>
+        <div>
+          <label for="timePlayerCount">Number of Players</label>
+          <select id="timePlayerCount" onchange="renderTimePlayers()"></select>
+        </div>
+      </div>
+
+      <div id="timePlayersWrap"></div>
+
+      <div class="row">
+        <div>
+          <label for="timeStart">Starting Time</label>
+          <input type="datetime-local" id="timeStart" />
+        </div>
+        <div>
+          <label for="timeEnd">End Time</label>
+          <input type="datetime-local" id="timeEnd" />
+        </div>
+      </div>
+
+      <button class="action-btn" onclick="calculateTimeBasedRP()">Calculate Output</button>
+      <button class="clear-btn" onclick="clearTimeTab()">Clear</button>
+
+      <div class="output" id="timeOutput">Your result will show here.</div>
+    </div>
+
+    <!-- CC TAB -->
+    <div id="ccTab" class="tab-content">
+      <h2 class="section-title">Character Count Roleplay</h2>
+
+      <div class="row">
+        <div>
+          <label for="ccSessionName">RP Session Name</label>
+          <input type="text" id="ccSessionName" placeholder="Enter RP session name" />
+        </div>
+        <div>
+          <label for="ccPlayerCount">Number of Players</label>
+          <select id="ccPlayerCount" onchange="renderCCPlayers()"></select>
+        </div>
+      </div>
+
+      <div id="ccPlayersWrap"></div>
+
+      <button class="action-btn" onclick="calculateCharacterCountRP()">Calculate Output</button>
+      <button class="clear-btn" onclick="clearCharacterCountTab()">Clear</button>
+
+      <div class="output" id="ccOutput">Your result will show here.</div>
+    </div>
+  </div>
+
+  <script>
+    const levelData = {
+      1:  { rpXP: 150, questXP: 225, gold: 50 },
+      2:  { rpXP: 200, questXP: 300, gold: 50 },
+      3:  { rpXP: 300, questXP: 450, gold: 50 },
+      4:  { rpXP: 400, questXP: 600, gold: 50 },
+      5:  { rpXP: 500, questXP: 750, gold: 100 },
+      6:  { rpXP: 500, questXP: 750, gold: 100 },
+      7:  { rpXP: 500, questXP: 750, gold: 100 },
+      8:  { rpXP: 500, questXP: 750, gold: 100 },
+      9:  { rpXP: 600, questXP: 900, gold: 150 },
+      10: { rpXP: 600, questXP: 900, gold: 150 },
+      11: { rpXP: 600, questXP: 900, gold: 150 },
+      12: { rpXP: 600, questXP: 900, gold: 150 },
+      13: { rpXP: 800, questXP: 1200, gold: 200 },
+      14: { rpXP: 800, questXP: 1200, gold: 200 },
+      15: { rpXP: 800, questXP: 1200, gold: 200 },
+      16: { rpXP: 800, questXP: 1200, gold: 200 },
+      17: { rpXP: 1200, questXP: 1800, gold: 250 },
+      18: { rpXP: 1200, questXP: 1800, gold: 250 },
+      19: { rpXP: 1200, questXP: 1800, gold: 250 },
+      20: { rpXP: 1, questXP: 1.5, gold: 250 }
+    };
+
+    function fillLevelDropdown(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">Select level</option>';
+      for (let i = 1; i <= 20; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        select.appendChild(option);
+      }
+    }
+
+    function fillPlayerCountDropdown(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = "";
+      for (let i = 1; i <= 10; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        select.appendChild(option);
+      }
+    }
+
+    fillPlayerCountDropdown("questPlayerCount");
+    fillPlayerCountDropdown("timePlayerCount");
+    fillPlayerCountDropdown("ccPlayerCount");
+    fillLevelDropdown("dmLevel");
+
+    function showTab(tabId, button) {
+      const tabs = document.querySelectorAll(".tab-content");
+      const buttons = document.querySelectorAll(".tab-btn");
+
+      tabs.forEach(tab => tab.classList.remove("active"));
+      buttons.forEach(btn => btn.classList.remove("active"));
+
+      document.getElementById(tabId).classList.add("active");
+      button.classList.add("active");
+    }
+
+    function renderQuestPlayers() {
+      const count = parseInt(document.getElementById("questPlayerCount").value);
+      const wrap = document.getElementById("questPlayersWrap");
+      wrap.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        wrap.innerHTML += `
+          <div class="player-card">
+            <h3 class="card-title">Player ${i}</h3>
+            <div class="row-3">
+              <div>
+                <label for="questPlayerName${i}">Player Name</label>
+                <input type="text" id="questPlayerName${i}" placeholder="@Player${i}" />
+              </div>
+              <div>
+                <label for="questCharacterName${i}">Character Name</label>
+                <input type="text" id="questCharacterName${i}" placeholder="Enter character name" />
+              </div>
+              <div>
+                <label for="questLevel${i}">Character Level</label>
+                <select id="questLevel${i}"></select>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      for (let i = 1; i <= count; i++) {
+        fillLevelDropdown("questLevel" + i);
+      }
+    }
+
+    function renderTimePlayers() {
+      const count = parseInt(document.getElementById("timePlayerCount").value);
+      const wrap = document.getElementById("timePlayersWrap");
+      wrap.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        wrap.innerHTML += `
+          <div class="player-card">
+            <h3 class="card-title">Player ${i}</h3>
+            <div class="row-3">
+              <div>
+                <label for="timePlayerName${i}">Player Name</label>
+                <input type="text" id="timePlayerName${i}" placeholder="@Player${i}" />
+              </div>
+              <div>
+                <label for="timeCharacterName${i}">Character Name</label>
+                <input type="text" id="timeCharacterName${i}" placeholder="Enter character name" />
+              </div>
+              <div>
+                <label for="timeLevel${i}">Character Level</label>
+                <select id="timeLevel${i}"></select>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      for (let i = 1; i <= count; i++) {
+        fillLevelDropdown("timeLevel" + i);
+      }
+    }
+
+    function renderCCPlayers() {
+      const count = parseInt(document.getElementById("ccPlayerCount").value);
+      const wrap = document.getElementById("ccPlayersWrap");
+      wrap.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        wrap.innerHTML += `
+          <div class="player-card">
+            <h3 class="card-title">Player ${i}</h3>
+
+            <div class="row-3">
+              <div>
+                <label for="ccPlayerName${i}">Player Name</label>
+                <input type="text" id="ccPlayerName${i}" placeholder="@Player${i}" />
+              </div>
+              <div>
+                <label for="ccCharacterName${i}">Character Name</label>
+                <input type="text" id="ccCharacterName${i}" placeholder="Enter character name" />
+              </div>
+              <div>
+                <label for="ccLevel${i}">Character Level</label>
+                <select id="ccLevel${i}"></select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="ccAutoCount${i}">Character Count (Automatic)</label>
+                <input type="text" id="ccAutoCount${i}" readonly placeholder="Auto counted" />
+              </div>
+              <div>
+                <label for="ccManualCount${i}">Character Count (Manual Optional)</label>
+                <input type="number" id="ccManualCount${i}" min="0" placeholder="Optional manual count" />
+              </div>
+            </div>
+
+            <label for="ccText${i}">Paste RP Text</label>
+            <textarea id="ccText${i}" placeholder="Paste RP text here..."></textarea>
+            <div class="small">Character count updates automatically as you type or paste. Manual count overrides auto count.</div>
+          </div>
+        `;
+      }
+
+      for (let i = 1; i <= count; i++) {
+        fillLevelDropdown("ccLevel" + i);
+        attachCCListener(i);
+      }
+    }
+
+    function attachCCListener(i) {
+      const textArea = document.getElementById("ccText" + i);
+      const autoBox = document.getElementById("ccAutoCount" + i);
+
+      textArea.addEventListener("input", function () {
+        autoBox.value = textArea.value.length;
+      });
+    }
+
+    renderQuestPlayers();
+    renderTimePlayers();
+    renderCCPlayers();
+
+    function getHoursBetween(startValue, endValue) {
+      const start = new Date(startValue);
+      const end = new Date(endValue);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return null;
+      }
+
+      const differenceMs = end - start;
+
+      if (differenceMs <= 0) {
+        return null;
+      }
+
+      return differenceMs / (1000 * 60 * 60);
+    }
+
+    function formatHours(hours) {
+      return hours.toFixed(2);
+    }
+
+    function getDMMotes(hours) {
+      if (hours < 4) {
+        return 0;
+      }
+      return 1 + Math.floor((hours - 4) / 2);
+    }
+
+    function calculateQuestRewards() {
+      const questName = document.getElementById("questName").value.trim();
+      const dmName = document.getElementById("dmName").value.trim();
+      const dmCharacterName = document.getElementById("dmCharacterName").value.trim();
+      const dmLevel = parseInt(document.getElementById("dmLevel").value);
+      const tierBoostChecked = document.getElementById("dmTierBoost").checked;
+      const count = parseInt(document.getElementById("questPlayerCount").value);
+      const startValue = document.getElementById("questStart").value;
+      const endValue = document.getElementById("questEnd").value;
+      const output = document.getElementById("questOutput");
+
+      if (questName === "") {
+        output.textContent = "Please enter a quest name.";
+        return;
+      }
+
+      if (dmName === "" || dmCharacterName === "" || !levelData[dmLevel]) {
+        output.textContent = "Please fill out the DM name, DM character name, and DM level.";
+        return;
+      }
+
+      const hours = getHoursBetween(startValue, endValue);
+
+      if (hours === null) {
+        output.textContent = "Please enter a valid start and end time. End time must be later than start time.";
+        return;
+      }
+
+      let resultText = "";
+      resultText += "[" + questName + "]\n";
+
+      for (let i = 1; i <= count; i++) {
+        const playerName = document.getElementById("questPlayerName" + i).value.trim();
+        const characterName = document.getElementById("questCharacterName" + i).value.trim();
+        const level = parseInt(document.getElementById("questLevel" + i).value);
+
+        if (playerName === "" || characterName === "" || !levelData[level]) {
+          output.textContent = "Please fill out every player name, character name, and level in the Quest Rewards tab.";
+          return;
+        }
+
+        const goldPerHour = levelData[level].gold;
+        const goldRaw = hours * goldPerHour;
+        const goldFinal = Math.ceil(goldRaw);
+
+        if (level === 20) {
+          const rovRaw = hours * levelData[level].questXP;
+          const rovFinal = Math.ceil(rovRaw);
+
+          resultText +=
+            "[" + playerName + "] – " + characterName + " (Level " + level + ") quested for " +
+            formatHours(hours) + " hr(s) earning " + rovFinal + " ROV and " + goldFinal + " gold.\n";
+        } else {
+          const questXPPerHour = levelData[level].questXP;
+          const xpRaw = hours * questXPPerHour;
+          const xpFinal = Math.ceil(xpRaw);
+
+          resultText +=
+            "[" + playerName + "] – " + characterName + " (Level " + level + ") quested for " +
+            formatHours(hours) + " hr(s) earning " + xpFinal + " XP and " + goldFinal + " gold.\n";
+        }
+      }
+
+      resultText += "------------------------------------------------------------\n\n";
+
+      const dmMotes = getDMMotes(hours);
+
+      const dmXpPerHour = tierBoostChecked
+        ? levelData[dmLevel].questXP * 1.5
+        : levelData[dmLevel].rpXP;
+
+      if (dmLevel === 20) {
+        const dmRovRaw = hours * dmXpPerHour;
+        const dmRovFinal = Math.ceil(dmRovRaw);
+
+        resultText +=
+          "[DM rewards: [" + dmName + "] – [" + dmCharacterName + "] [(Level " + dmLevel + ")] receives " +
+          dmMotes + " motes and " + dmRovFinal + " ROV]";
+      } else {
+        const dmXPRaw = hours * dmXpPerHour;
+        const dmXPFinal = Math.ceil(dmXPRaw);
+
+        resultText +=
+          "[DM rewards: [" + dmName + "] – [" + dmCharacterName + "] [(Level " + dmLevel + ")] receives " +
+          dmMotes + " motes and " + dmXPFinal + " XP]";
+      }
+
+      output.textContent = resultText;
+    }
+
+    function calculateTimeBasedRP() {
+      const sessionName = document.getElementById("timeSessionName").value.trim();
+      const count = parseInt(document.getElementById("timePlayerCount").value);
+      const startValue = document.getElementById("timeStart").value;
+      const endValue = document.getElementById("timeEnd").value;
+      const output = document.getElementById("timeOutput");
+
+      if (sessionName === "") {
+        output.textContent = "Please enter an RP session name.";
+        return;
+      }
+
+      const hours = getHoursBetween(startValue, endValue);
+
+      if (hours === null) {
+        output.textContent = "Please enter a valid start and end time. End time must be later than start time.";
+        return;
+      }
+
+      let resultText = "";
+      resultText += "[" + sessionName + "]\n\n";
+
+      for (let i = 1; i <= count; i++) {
+        const playerName = document.getElementById("timePlayerName" + i).value.trim();
+        const characterName = document.getElementById("timeCharacterName" + i).value.trim();
+        const level = parseInt(document.getElementById("timeLevel" + i).value);
+
+        if (playerName === "" || characterName === "" || !levelData[level]) {
+          output.textContent = "Please fill out every player name, character name, and level in the Time-based Roleplay tab.";
+          return;
+        }
+
+        if (level === 20) {
+          const rovRaw = hours * levelData[level].rpXP;
+          const rovFinal = Math.ceil(rovRaw);
+
+          resultText +=
+            "[" + playerName + "] – " + characterName + " (Level " + level + ") roleplayed for " +
+            formatHours(hours) + " hr(s) earning " + rovFinal + " ROV.\n";
+        } else {
+          const xpPerHour = levelData[level].rpXP;
+          const xpRaw = hours * xpPerHour;
+          const xpFinal = Math.ceil(xpRaw);
+
+          resultText +=
+            "[" + playerName + "] – " + characterName + " (Level " + level + ") roleplayed for " +
+            formatHours(hours) + " hr(s) earning " + xpFinal + " XP.\n";
+        }
+      }
+
+      output.textContent = resultText.trim();
+    }
+
+    function calculateCharacterCountRP() {
+      const sessionName = document.getElementById("ccSessionName").value.trim();
+      const count = parseInt(document.getElementById("ccPlayerCount").value);
+      const output = document.getElementById("ccOutput");
+
+      if (sessionName === "") {
+        output.textContent = "Please enter an RP session name.";
+        return;
+      }
+
+      let resultText = "";
+      resultText += "[" + sessionName + "]\n\n";
+
+      for (let i = 1; i <= count; i++) {
+        const playerName = document.getElementById("ccPlayerName" + i).value.trim();
+        const characterName = document.getElementById("ccCharacterName" + i).value.trim();
+        const level = parseInt(document.getElementById("ccLevel" + i).value);
+        const autoCount = document.getElementById("ccText" + i).value.length;
+        const manualCountValue = parseInt(document.getElementById("ccManualCount" + i).value);
+
+        if (playerName === "" || characterName === "" || !levelData[level]) {
+          output.textContent = "Please fill out every player name, character name, and level in the Character Count Roleplay tab.";
+          return;
+        }
+
+        const charCount = !isNaN(manualCountValue) && manualCountValue >= 0 ? manualCountValue : autoCount;
+        const rate = charCount / 3000;
+
+        if (level === 20) {
+          const rovRaw = rate * levelData[level].rpXP;
+          const rovFinal = Math.ceil(rovRaw);
+
+          resultText +=
+            "[" + playerName + "] – " + characterName + " (Level " + level + ") typed " +
+            charCount + " characters and earned " + rovFinal + " ROV.\n";
+        } else {
+          const xpRaw = rate * levelData[level].rpXP;
+          const xpFinal = Math.ceil(xpRaw);
+
+          resultText +=
+            "[" + playerName + "] – " + characterName + " (Level " + level + ") typed " +
+            charCount + " characters and earned " + xpFinal + " XP.\n";
+        }
+      }
+
+      output.textContent = resultText.trim();
+    }
+
+    function clearQuestTab() {
+      document.getElementById("questName").value = "";
+      document.getElementById("dmName").value = "";
+      document.getElementById("dmCharacterName").value = "";
+      document.getElementById("dmLevel").value = "";
+      document.getElementById("dmTierBoost").checked = false;
+      document.getElementById("questPlayerCount").value = "1";
+      document.getElementById("questStart").value = "";
+      document.getElementById("questEnd").value = "";
+      renderQuestPlayers();
+      document.getElementById("questOutput").textContent = "Your result will show here.";
+    }
+
+    function clearTimeTab() {
+      document.getElementById("timeSessionName").value = "";
+      document.getElementById("timePlayerCount").value = "1";
+      document.getElementById("timeStart").value = "";
+      document.getElementById("timeEnd").value = "";
+      renderTimePlayers();
+      document.getElementById("timeOutput").textContent = "Your result will show here.";
+    }
+
+    function clearCharacterCountTab() {
+      document.getElementById("ccSessionName").value = "";
+      document.getElementById("ccPlayerCount").value = "1";
+      renderCCPlayers();
+      document.getElementById("ccOutput").textContent = "Your result will show here.";
+    }
+  </script>
+</body>
+</html>
