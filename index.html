@@ -403,7 +403,7 @@
 
         <div class="check-wrap">
           <input type="checkbox" id="dmTierBoost" />
-          <label for="dmTierBoost">Use quest XP rewards for DM (Tier 1 / Tier 2 bracket)</label>
+          <label for="dmTierBoost">Tier 1 / Tier 2 quest (DM gets player quest XP rate)</label>
         </div>
       </div>
 
@@ -976,10 +976,11 @@
     }
 
     function getDMMotes(hours) {
-      if (hours < 4) {
-        return 0;
-      }
-      return 1 + Math.floor((hours - 4) / 2);
+        if (hours <= 4) {
+          return 1;
+        }
+
+        return 1 + Math.floor((hours - 4) / 2);
     }
 
     function calculateQuestRewards() {
@@ -1036,7 +1037,7 @@
 
           resultText +=
             "@" + playerName + " - **" + characterName + "** (Level " + level + ") quested for " +
-            formatHours(hours) + " hr(s) earning " + rovFinal + " ROV and " + goldFinal + " gold.\n";
+            formatHours(hours) + " hr(s) earning " + rovFinal + " ROV, " + goldFinal + " gold, and 1 SP.\n";
         } else {
           const questXPPerHour = levelData[level].questXP;
           const xpRaw = hours * questXPPerHour;
@@ -1044,16 +1045,17 @@
 
           resultText +=
             "@" + playerName + " - **" + characterName + "** (Level " + level + ") quested for " +
-            formatHours(hours) + " hr(s) earning " + xpFinal + " XP and " + goldFinal + " gold.\n";
+            formatHours(hours) + " hr(s) earning " + xpFinal + " XP, " + goldFinal + " gold, and 1 SP.\n";
         }
       }
 
       resultText += "------------------------------------------------------------\n\n";
 
       const dmMotes = getDMMotes(hours);
-
+      const dmGoldRaw = hours * levelData[dmLevel].gold;
+      const dmGoldFinal = Math.ceil(dmGoldRaw);
       const dmXpPerHour = tierBoostChecked
-        ? levelData[dmLevel].questXP * 1.5
+        ? levelData[dmLevel].questXP
         : levelData[dmLevel].rpXP;
 
       if (dmLevel === 20) {
@@ -1062,14 +1064,14 @@
 
         resultText +=
           "**DM rewards**: @" + dmName + " - **" + dmCharacterName + "** (Level " + dmLevel + ") receives " +
-          dmMotes + " mote(s) and " + dmRovFinal + " ROV.";
+          dmMotes + " mote(s), " + dmRovFinal + " ROV, and " + dmGoldFinal + " gold.";
       } else {
         const dmXPRaw = hours * dmXpPerHour;
         const dmXPFinal = Math.ceil(dmXPRaw);
 
         resultText +=
           "**DM rewards**: @" + dmName + " - **" + dmCharacterName + "** (Level " + dmLevel + ") receives " +
-          dmMotes + " mote(s) and " + dmXPFinal + " XP.";
+          dmMotes + " mote(s), " + dmXPFinal + " XP, and " + dmGoldFinal + " gold.";
       }
 
       output.textContent = resultText;
